@@ -285,17 +285,18 @@ fn test_openssl_rsa_given() {
 #[test]
 fn test_openssl_rsa_combinations_given() {
 	let alg_list = [
-		&rcgen::PKCS_RSA_SHA256,
-		&rcgen::PKCS_RSA_SHA384,
-		&rcgen::PKCS_RSA_SHA512,
-		//&rcgen::PKCS_RSA_PSS_SHA256,
-		//&rcgen::PKCS_RSA_PSS_SHA384,
-		//&rcgen::PKCS_RSA_PSS_SHA512,
+		(&rcgen::PKCS_RSA_SHA256, util::RSA_TEST_KEY_PAIR_PEM),
+		(&rcgen::PKCS_RSA_SHA384, util::RSA_TEST_KEY_PAIR_PEM),
+		(&rcgen::PKCS_RSA_SHA512, util::RSA_TEST_KEY_PAIR_PEM),
+		(&rcgen::PKCS_RSA_PSS_SHA256, util::RSA_TEST_KEY_PAIR_PEM),
+		(&rcgen::PKCS_RSA_PSS_SHA512, util::RSA_TEST_KEY_PAIR_PEM),
+		// openssl throws "ee key too small" error for these types if RSA_TEST_KEY_PAIR_PEM is used
+		// (&rcgen::PKCS_RSA_PSS_SHA384, util::RSA4096_TEST_KEY_PAIR_PEM),
 	];
-	for (i, alg) in alg_list.iter().enumerate() {
+	for (i, (alg, test_key)) in alg_list.iter().enumerate() {
 		let (params, _) = util::default_params();
-		let key_pair =
-			KeyPair::from_pkcs8_pem_and_sign_algo(util::RSA_TEST_KEY_PAIR_PEM, alg).unwrap();
+		let key_pair = KeyPair::from_pkcs8_pem_and_sign_algo(test_key, alg).unwrap();
+
 		let cert = params.self_signed(&key_pair).unwrap();
 
 		// Now verify the certificate.
